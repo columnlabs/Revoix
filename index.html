@@ -29,6 +29,7 @@
   <meta name="Access-Control-Allow-Origin" value="http://localhost, https://exotek.co, https://*.exotek.co, https://hcaptcha.com, https://*.hcaptcha.com" />
   
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=call" />
 </head>
 <style>
   /* Font Start */
@@ -238,6 +239,13 @@
     </div>
   </div>
 
+  <!-- Hidden audio element to handle the incoming call stream -->
+  <audio id="remoteAudio" style="display:none"></audio>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+  <script>eruda.init();</script>
+
   <script async>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
@@ -247,6 +255,7 @@
   </script>
 
   <script src="https://static.simplesocket.net/library/js/2.1/simplesocket.js"></script>
+  <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
   <script src="utilities.js"></script>
   <script src="crucial.js"></script>
 </body>

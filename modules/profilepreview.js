@@ -9,13 +9,15 @@ function updateProfileSub() {
   if (userUpdateSub != null) {
     userUpdateSub.edit(query);
   } else {
-    userUpdateSub = socket.subscribe(query, async function(data) {
+    userUpdateSub = socket.subscribe(query, async function (data) {
       let user = recentUsers[data._id];
       if (data._id == userID) {
         user = account;
       }
       if (data.popup != null) {
-        showPopUp(data.popup[0], data.popup[1], [ ["Okay", "var(--themeColor)"] ]);
+        showPopUp(data.popup[0], data.popup[1], [
+          ["Okay", "var(--themeColor)"],
+        ]);
       }
       if (data.type == null) {
         if (user == null) {
@@ -25,7 +27,11 @@ function updateProfileSub() {
           let keys = Object.keys(obj);
           for (let i = 0; i < keys.length; i++) {
             let key = keys[i];
-            if (typeof obj[key] != "object" || Array.isArray(obj[key]) == true || obj[key] == null) {
+            if (
+              typeof obj[key] != "object" ||
+              Array.isArray(obj[key]) == true ||
+              obj[key] == null
+            ) {
               if (obj[key] != null) {
                 passData[key] = obj[key];
               } else if (passData[key]) {
@@ -40,22 +46,33 @@ function updateProfileSub() {
         recUpdate(data.data, user);
         if (data.data.Status != null) {
           let status = statuses[data.data.Status || 0];
-          let previewStatus = body.querySelector(".previewStatus[userid='" + data._id + "']");
+          let previewStatus = body.querySelector(
+            ".previewStatus[userid='" + data._id + "']"
+          );
           if (previewStatus != null) {
             previewStatus.style.background = status[1];
             previewStatus.setAttribute("title", status[0]);
           }
-          let profileStatus = body.querySelector(".profileStatus[userid='" + data._id + "']");
+          let profileStatus = body.querySelector(
+            ".profileStatus[userid='" + data._id + "']"
+          );
           if (profileStatus != null) {
             profileStatus.style.background = status[1];
             profileStatus.setAttribute("title", status[0]);
           }
         } else if (data._id == userID) {
-          if (data.data.Settings != null && data.data.Settings.ProfilePic != null) {
-            findC("accountInfoPic").src = config.assets + "ProfileImages/" + data.data.Settings.ProfilePic;
+          if (
+            data.data.Settings != null &&
+            data.data.Settings.ProfilePic != null
+          ) {
+            findC("accountInfoPic").src =
+              config.assets + "ProfileImages/" + data.data.Settings.ProfilePic;
           } else if (data.data.User != null) {
             findC("accountInfoName").textContent = data.data.User;
-          } else if (data.data.ProfileData != null && data.data.ProfileData.Socials != null) {
+          } else if (
+            data.data.ProfileData != null &&
+            data.data.ProfileData.Socials != null
+          ) {
             let socialSettingsHolder = findI("activeConnections");
             if (socialSettingsHolder != null) {
               let socialKeys = Object.keys(data.data.ProfileData.Socials);
@@ -78,41 +95,82 @@ function updateProfileSub() {
                 let socialID = social.replace(socialType + "_", "");
                 let socialInfo = socialLinkData[keyInfo[0]];
                 findI("connectionCount").textContent++;
-                thisSocial = createElement("socialConnection", "div", socialSettingsHolder);
+                thisSocial = createElement(
+                  "socialConnection",
+                  "div",
+                  socialSettingsHolder
+                );
                 thisSocial.innerHTML = `<a class="profileSocialButton" style="background: ${socialLinkData[socialType][1]}; content: url(./icons/socials/${socialType}.svg)"></a> <b>${value}</b> <span class="removeSocial" id="removeSocial${i}" tabindex="0">&times;</span>`;
                 thisSocial.id = social;
-                let socialButton = thisSocial.querySelector(".profileSocialButton");
-                socialButton.setAttribute("title", keyInfo[0] + " (" + value + ")");
+                let socialButton = thisSocial.querySelector(
+                  ".profileSocialButton"
+                );
+                socialButton.setAttribute(
+                  "title",
+                  keyInfo[0] + " (" + value + ")"
+                );
                 if (socialInfo[2] != "PROMPT_USERNAME") {
-                  socialButton.setAttribute("href", socialInfo[2].replace(/USERID_GOES_HERE/g, keyInfo.splice(1).join("_")).replace(/USERNAME_GOES_HERE/g, value));
+                  socialButton.setAttribute(
+                    "href",
+                    socialInfo[2]
+                      .replace(/USERID_GOES_HERE/g, keyInfo.splice(1).join("_"))
+                      .replace(/USERNAME_GOES_HERE/g, value)
+                  );
                   socialButton.setAttribute("target", "_blank");
                 } else {
-                  socialButton.setAttribute("onmouseup", 'showPopUp("' + socialInfo[0] + '", "<i>' + cleanString(value) + '</i>", [ ["Done", "var(--grayColor)"] ])');
+                  socialButton.setAttribute(
+                    "onmouseup",
+                    'showPopUp("' +
+                      socialInfo[0] +
+                      '", "<i>' +
+                      cleanString(value) +
+                      '</i>", [ ["Done", "var(--grayColor)"] ])'
+                  );
                 }
-                thisSocial.querySelector(".removeSocial").addEventListener("click", async function() {
-                  thisSocial.style.opacity = 0.5;
-                  let [code, response] = await sendRequest("DELETE", "me/remove/social?socialid=" + social);
-                  if (code != 200) {
-                    thisSocial.style.opacity = 1;
-                  }
-                });
+                thisSocial
+                  .querySelector(".removeSocial")
+                  .addEventListener("click", async function () {
+                    thisSocial.style.opacity = 0.5;
+                    let [code, response] = await sendRequest(
+                      "DELETE",
+                      "me/remove/social?socialid=" + social
+                    );
+                    if (code != 200) {
+                      thisSocial.style.opacity = 1;
+                    }
+                  });
               }
             }
-          } else if (data.data.Settings != null && data.data.Settings.Display != null) {
+          } else if (
+            data.data.Settings != null &&
+            data.data.Settings.Display != null
+          ) {
             setLocalStore("display", JSON.stringify(account.Settings.Display));
             updateDisplay(account.Settings.Display.Theme);
-          } else if (data.data.Settings != null && data.data.Settings.hasOwnProperty("Backdrop")) {
+          } else if (
+            data.data.Settings != null &&
+            data.data.Settings.hasOwnProperty("Backdrop")
+          ) {
             updateBackdrop(account.Settings.Backdrop);
             setLocalStore("backdrop", account.Settings.Backdrop);
-          } else if (data.data.Affiliate != null && findC("settingsAffiliateStats") != null) {
-            findI("settingsAffiliateStatClicks").textContent = ((account.Affiliate || {}).Clicks || 0) + " Clicks";
-            findI("settingsAffiliateStatSignUps").textContent = ((account.Affiliate || {}).SignUps || 0) + " Sign Ups";
-          } else if (data.data.Premium != null && data.data.Premium.GiftMonths != null) {
-						if (findI("giftLengthInput") != null) {
-	            findI("giftLengthInput").placeholder = account.Premium.GiftMonths || 0;
-							findI("currentGifts").innerText = account.Premium.GiftMonths || 0;
-						}
-						findI("giftCount").innerText = account.Premium.GiftMonths || 0;
+          } else if (
+            data.data.Affiliate != null &&
+            findC("settingsAffiliateStats") != null
+          ) {
+            findI("settingsAffiliateStatClicks").textContent =
+              ((account.Affiliate || {}).Clicks || 0) + " Clicks";
+            findI("settingsAffiliateStatSignUps").textContent =
+              ((account.Affiliate || {}).SignUps || 0) + " Sign Ups";
+          } else if (
+            data.data.Premium != null &&
+            data.data.Premium.GiftMonths != null
+          ) {
+            if (findI("giftLengthInput") != null) {
+              findI("giftLengthInput").placeholder =
+                account.Premium.GiftMonths || 0;
+              findI("currentGifts").innerText = account.Premium.GiftMonths || 0;
+            }
+            findI("giftCount").innerText = account.Premium.GiftMonths || 0;
           }
         }
       } else {
@@ -125,14 +183,18 @@ function updateProfileSub() {
             }
             user.ProfileData = user.ProfileData || {};
             followerUser.ProfileData = followerUser.ProfileData || {};
-            user.ProfileData.Followers = (user.ProfileData.Followers || 0) + data.change; 
-            followerUser.ProfileData.Following = (followerUser.ProfileData.Following || 0) + data.change;
+            user.ProfileData.Followers =
+              (user.ProfileData.Followers || 0) + data.change;
+            followerUser.ProfileData.Following =
+              (followerUser.ProfileData.Following || 0) + data.change;
             if (data.userID == userID) {
               recentUsers[data.userID] = followerUser;
             }
             if (data.userID == userID) {
               user.isFollowing = data.change == true;
-              let followPreviewButton = body.querySelector(".previewFollowButton[userid='" + data._id + "']");
+              let followPreviewButton = body.querySelector(
+                ".previewFollowButton[userid='" + data._id + "']"
+              );
               if (followPreviewButton != null) {
                 if (user.isFollowing == true) {
                   followPreviewButton.textContent = "Unfollow";
@@ -142,7 +204,9 @@ function updateProfileSub() {
                   followPreviewButton.style.background = "var(--themeColor)";
                 }
               }
-              let followProfileButton = body.querySelector(".profileFollow[userid='" + data._id + "']");
+              let followProfileButton = body.querySelector(
+                ".profileFollow[userid='" + data._id + "']"
+              );
               if (followProfileButton != null) {
                 if (user.isFollowing == true) {
                   followProfileButton.textContent = "Unfollow";
@@ -153,13 +217,20 @@ function updateProfileSub() {
                 }
               }
             }
-            let followerCounts = body.querySelectorAll("[count='followerCount'][userid='" + data._id + "']");
+            let followerCounts = body.querySelectorAll(
+              "[count='followerCount'][userid='" + data._id + "']"
+            );
             for (let i = 0; i < followerCounts.length; i++) {
               changeCounter(followerCounts[i], user.ProfileData.Followers);
             }
-            let followingCounts = body.querySelectorAll("[count='followingCount'][userid='" + data.userID + "']");
+            let followingCounts = body.querySelectorAll(
+              "[count='followingCount'][userid='" + data.userID + "']"
+            );
             for (let i = 0; i < followingCounts.length; i++) {
-              changeCounter(followingCounts[i], followerUser.ProfileData.Following);
+              changeCounter(
+                followingCounts[i],
+                followerUser.ProfileData.Following
+              );
             }
         }
       }
@@ -170,7 +241,7 @@ function updateProfileSub() {
   }
 }
 
-modules.profilepreview = async function(element, getID) {
+modules.profilepreview = async function (element, getID) {
   if (findC("profilePreview") != null) {
     closeProfilePreview();
   }
@@ -179,7 +250,9 @@ modules.profilepreview = async function(element, getID) {
     data = account;
   }
   let rect = element.getBoundingClientRect();
-  let preview = createElement("profilePreview", "div", "body", { top: rect.top + "px" });
+  let preview = createElement("profilePreview", "div", "body", {
+    top: rect.top + "px",
+  });
   preview.style.left = rect.right + 4 + "px";
   preview.style.transformOrigin = "top left";
   let previewRect = preview.getBoundingClientRect();
@@ -198,7 +271,9 @@ modules.profilepreview = async function(element, getID) {
   if (data == null) {
     let [code, response] = await sendRequest("GET", "user?id=" + getID);
     if (code != 200) {
-      showPopUp("Error Loading Profile", response, [["Okay", "var(--grayColor)"]]);
+      showPopUp("Error Loading Profile", response, [
+        ["Okay", "var(--grayColor)"],
+      ]);
       return;
     }
     recentUsers[getID] = JSON.parse(response);
@@ -207,7 +282,9 @@ modules.profilepreview = async function(element, getID) {
   }
   let profileBanner;
   if (data.Settings != null && data.Settings.ProfileBanner != null) {
-    profileBanner = `<img class="previewBanner" src="${config.assets + "ProfileBanners/" + data.Settings.ProfileBanner}">`;
+    profileBanner = `<img class="previewBanner" src="${
+      config.assets + "ProfileBanners/" + data.Settings.ProfileBanner
+    }">`;
   } else {
     profileBanner = `<div class="previewBanner" style="background: var(--contentColor)"></div>`;
   }
@@ -217,26 +294,51 @@ modules.profilepreview = async function(element, getID) {
   if (bio.length > 200) {
     bio = bio.substring(0, 200) + "...";
   }
-  let previewHTML = `
+  let previewHTML =
+    `
     ${profileBanner}
     <div class="previewContent">
       <div class="previewPfpHolder">
         <img src="${decideProfilePic(data)}" class="previewPfp">
-        <div class="previewStatus" userid="${data._id}" style="background: ${status[1]}" title="${status[0]}"></div>
+        <div class="previewStatus" userid="${data._id}" style="background: ${
+      status[1]
+    }" title="${status[0]}"></div>
       </div>
       <button class="previewFollowButton" userid="${data._id}">Follow</button>
     </div>
-    <div class="previewUsername">${getRoleHTML(data, 5) != "" ? getRoleHTML(data, 5) + "<br>" : ""}<span style="font-size: 30px;">${data.User}</span></div>
+    <div class="previewUsername">${
+      getRoleHTML(data, 5) != "" ? getRoleHTML(data, 5) + "<br>" : ""
+    }<span style="font-size: 30px;">${data.User}</span></div>
     <div class="previewFollow">
-      <div tabindex="0" class="previewCount" onclick="modifyParams('user', '` + getID + `'); setPage('followers'); closeProfilePreview();">
-        <span class="previewCountTicker"><span class="previewCountNumber" count="followerCount" userid="${data._id}" realnum="${data.ProfileData.Followers || 0}" title="${(data.ProfileData.Followers || 0).toLocaleString()}">${abbr(data.ProfileData.Followers) || 0}</span></span> ${data.ProfileData.Followers == 1 ? "Follower" : "Followers"}
+      <div tabindex="0" class="previewCount" onclick="modifyParams('user', '` +
+    getID +
+    `'); setPage('followers'); closeProfilePreview();">
+        <span class="previewCountTicker"><span class="previewCountNumber" count="followerCount" userid="${
+          data._id
+        }" realnum="${data.ProfileData.Followers || 0}" title="${(
+      data.ProfileData.Followers || 0
+    ).toLocaleString()}">${
+      abbr(data.ProfileData.Followers) || 0
+    }</span></span> ${
+      data.ProfileData.Followers == 1 ? "Follower" : "Followers"
+    }
       </div>
-      <div tabindex="0" class="previewCount" onclick="modifyParams('user', '` + getID + `'); setPage('following'); closeProfilePreview();">
-        <span class="previewCountTicker"><span class="previewCountNumber" count="followingCount" userid="${data._id}" realnum="${data.ProfileData.Following || 0}" title="${(data.ProfileData.Following || 0).toLocaleString()}">${abbr(data.ProfileData.Following) || 0}</span></span> Following
+      <div tabindex="0" class="previewCount" onclick="modifyParams('user', '` +
+    getID +
+    `'); setPage('following'); closeProfilePreview();">
+        <span class="previewCountTicker"><span class="previewCountNumber" count="followingCount" userid="${
+          data._id
+        }" realnum="${data.ProfileData.Following || 0}" title="${(
+      data.ProfileData.Following || 0
+    ).toLocaleString()}">${
+      abbr(data.ProfileData.Following) || 0
+    }</span></span> Following
       </div>
     </div>
       <div class="previewBio"></div>
-      <button class="previewActionButton" style="color: var(--themeColor);" onclick="modifyParams('user', '` + getID + `'); setPage('profile'); closeProfilePreview();">View Profile</button>
+      <button class="previewActionButton" style="color: var(--themeColor);" onclick="modifyParams('user', '` +
+    getID +
+    `'); setPage('profile'); closeProfilePreview();">View Profile</button>
     </div>`;
   preview.innerHTML = previewHTML;
   let followButton = preview.querySelector(".previewFollowButton");
@@ -255,9 +357,11 @@ modules.profilepreview = async function(element, getID) {
     followButton.textContent = "Unfollow";
     followButton.style.background = "#FF5C5C";
   }
-  followButton.addEventListener("click", async function() {
+  followButton.addEventListener("click", async function () {
     if (userID == null) {
-      promptLogin('Join the hangout today! You must <b>sign in</b> or <b>sign up</b> before being able to <b style="color: var(--themeColor)">Follow</b> a user!')
+      promptLogin(
+        'Join the hangout today! You must <b>sign in</b> or <b>sign up</b> before being able to <b style="color: var(--themeColor)">Follow</b> a user!'
+      );
       return;
     }
     function updateFollow(type) {
@@ -265,12 +369,18 @@ modules.profilepreview = async function(element, getID) {
         data.isFollowing = true;
         followButton.textContent = "Unfollow";
         followButton.style.background = "#FF5C5C";
-        changeCounter(followCount, parseInt(followCount.getAttribute("realnum"),10)+1);
+        changeCounter(
+          followCount,
+          parseInt(followCount.getAttribute("realnum"), 10) + 1
+        );
       } else {
         data.isFollowing = false;
         followButton.textContent = "Follow";
         followButton.style.background = "var(--themeColor)";
-        changeCounter(followCount, parseInt(followCount.getAttribute("realnum"),10)-1);
+        changeCounter(
+          followCount,
+          parseInt(followCount.getAttribute("realnum"), 10) - 1
+        );
       }
     }
     if (followButton.textContent == "Follow") {
@@ -288,61 +398,159 @@ modules.profilepreview = async function(element, getID) {
     }
   });
 
-	if (currentPage == "group") {
-		let group = groups[getParam("group")];
-		if (group != null && !group.Moderators.includes(getID) && group.Owner != getID && (group.Owner == userID || group.isMod) && element.className != "inviteUsernameTile") {
-			let isMod = group.Moderators.includes(getID);
-			let dropdown = [
-				["Kick User", "#FF5C5C", function() {
-				 	showPopUp("Kick " + data.User + "?", "Are you sure you want to kick <b>" + data.User + "</b> from your group?", [["Kick", "#FF5C5C", async function() {
-					 	let [code, response] = await sendRequest("PUT", "groups/moderate?groupid=" + getParam("group"), { type: "kick", data: getID });
-					 	if (code != 200) {
-						 	showPopUp("Failed to Kick", response, [["Okay", "var(--grayColor)"]]);
-					 	}
-				 	}], ["Cancel", "var(--grayColor)"]]);
-				 	closeProfilePreview();
-			 	}],
-				["Ban User", "#FF5C5C", function() {
-					showPopUp("Ban " + data.User + "?", "Are you sure you want to ban <b>" + data.User + "</b> from your group?", [["Ban", "#FF5C5C", async function() {
-						let [code, response] = await sendRequest("PUT", "groups/moderate?groupid=" + getParam("group"), { type: "ban", data: getID });
-						if (code != 200) {
-							showPopUp("Failed to Ban", response, [["Okay", "var(--grayColor)"]]);
-						}
-					}], ["Cancel", "var(--grayColor)"]]);
-				 	closeProfilePreview();
-		 		}]
-			];
-			if (group.Owner == userID && data._id != userID) {
-				if (isMod) {
-					dropdown.unshift(["Demote", "#FF5C5C", async function () {
-						showPopUp("Demote " + data.User + "?", "Are you sure you want to demote <b>" + data.User + "</b>? They will no longer be a moderator.", [["Demote", "#FF5C5C", async function() {
-							let [code, response] = await sendRequest("PUT", "groups/moderate?groupid=" + getParam("group"), { type: "demote", data: data._id });
-							if (code != 200) {
-								showPopUp("Failed to Demote", response, [["Okay", "var(--grayColor)"]]);
-							}
-						}], ["Cancel", "var(--grayColor)"]]);
-					}]);
-				} else {
-					dropdown.unshift(["Promote", "var(--themeColor)", async function () {
-						showPopUp("Promote " + data.User + "?", "Are you sure you want to promote <b>" + data.User + "</b>? They will become a moderator and will be able to delete posts and ban/kick users in this group.", [["Promote", "var(--themeColor)", async function() {
-							let [code, response] = await sendRequest("PUT", "groups/moderate?groupid=" + getParam("group"), { type: "promote", data: data._id });
-							if (code != 200) {
-								showPopUp("Failed to Promote", response, [["Okay", "var(--grayColor)"]]);
-							}
-						}], ["Cancel", "var(--grayColor)"]]);
-					}]);
-				}
-			}
-			
-			let previewOptions = createElement("previewOptions", "div", preview)
-			previewOptions.innerHTML = `
+  if (currentPage == "group") {
+    let group = groups[getParam("group")];
+    if (
+      group != null &&
+      !group.Moderators.includes(getID) &&
+      group.Owner != getID &&
+      (group.Owner == userID || group.isMod) &&
+      element.className != "inviteUsernameTile"
+    ) {
+      let isMod = group.Moderators.includes(getID);
+      let dropdown = [
+        [
+          "Kick User",
+          "#FF5C5C",
+          function () {
+            showPopUp(
+              "Kick " + data.User + "?",
+              "Are you sure you want to kick <b>" +
+                data.User +
+                "</b> from your group?",
+              [
+                [
+                  "Kick",
+                  "#FF5C5C",
+                  async function () {
+                    let [code, response] = await sendRequest(
+                      "PUT",
+                      "groups/moderate?groupid=" + getParam("group"),
+                      { type: "kick", data: getID }
+                    );
+                    if (code != 200) {
+                      showPopUp("Failed to Kick", response, [
+                        ["Okay", "var(--grayColor)"],
+                      ]);
+                    }
+                  },
+                ],
+                ["Cancel", "var(--grayColor)"],
+              ]
+            );
+            closeProfilePreview();
+          },
+        ],
+        [
+          "Ban User",
+          "#FF5C5C",
+          function () {
+            showPopUp(
+              "Ban " + data.User + "?",
+              "Are you sure you want to ban <b>" +
+                data.User +
+                "</b> from your group?",
+              [
+                [
+                  "Ban",
+                  "#FF5C5C",
+                  async function () {
+                    let [code, response] = await sendRequest(
+                      "PUT",
+                      "groups/moderate?groupid=" + getParam("group"),
+                      { type: "ban", data: getID }
+                    );
+                    if (code != 200) {
+                      showPopUp("Failed to Ban", response, [
+                        ["Okay", "var(--grayColor)"],
+                      ]);
+                    }
+                  },
+                ],
+                ["Cancel", "var(--grayColor)"],
+              ]
+            );
+            closeProfilePreview();
+          },
+        ],
+      ];
+      if (group.Owner == userID && data._id != userID) {
+        if (isMod) {
+          dropdown.unshift([
+            "Demote",
+            "#FF5C5C",
+            async function () {
+              showPopUp(
+                "Demote " + data.User + "?",
+                "Are you sure you want to demote <b>" +
+                  data.User +
+                  "</b>? They will no longer be a moderator.",
+                [
+                  [
+                    "Demote",
+                    "#FF5C5C",
+                    async function () {
+                      let [code, response] = await sendRequest(
+                        "PUT",
+                        "groups/moderate?groupid=" + getParam("group"),
+                        { type: "demote", data: data._id }
+                      );
+                      if (code != 200) {
+                        showPopUp("Failed to Demote", response, [
+                          ["Okay", "var(--grayColor)"],
+                        ]);
+                      }
+                    },
+                  ],
+                  ["Cancel", "var(--grayColor)"],
+                ]
+              );
+            },
+          ]);
+        } else {
+          dropdown.unshift([
+            "Promote",
+            "var(--themeColor)",
+            async function () {
+              showPopUp(
+                "Promote " + data.User + "?",
+                "Are you sure you want to promote <b>" +
+                  data.User +
+                  "</b>? They will become a moderator and will be able to delete posts and ban/kick users in this group.",
+                [
+                  [
+                    "Promote",
+                    "var(--themeColor)",
+                    async function () {
+                      let [code, response] = await sendRequest(
+                        "PUT",
+                        "groups/moderate?groupid=" + getParam("group"),
+                        { type: "promote", data: data._id }
+                      );
+                      if (code != 200) {
+                        showPopUp("Failed to Promote", response, [
+                          ["Okay", "var(--grayColor)"],
+                        ]);
+                      }
+                    },
+                  ],
+                  ["Cancel", "var(--grayColor)"],
+                ]
+              );
+            },
+          ]);
+        }
+      }
+
+      let previewOptions = createElement("previewOptions", "div", preview);
+      previewOptions.innerHTML = `
 				<svg viewBox="0 0 41.915 41.915"><g fill="var(--themeColor)"><path style="" id="Svg" d="M11.214,20.956c0,3.091-2.509,5.589-5.607,5.589C2.51,26.544,0,24.046,0,20.956c0-3.082,2.511-5.585,5.607-5.585 C8.705,15.371,11.214,17.874,11.214,20.956z"></path><path d="M26.564,20.956c0,3.091-2.509,5.589-5.606,5.589c-3.097,0-5.607-2.498-5.607-5.589c0-3.082,2.511-5.585,5.607-5.585 C24.056,15.371,26.564,17.874,26.564,20.956z"></path><path d="M41.915,20.956c0,3.091-2.509,5.589-5.607,5.589c-3.097,0-5.606-2.498-5.606-5.589c0-3.082,2.511-5.585,5.606-5.585 C39.406,15.371,41.915,17.874,41.915,20.956z"></path></g></svg>
 			`;
-			tempListen(previewOptions, "click", function() {
-				showDropdown(previewOptions, "left", dropdown);
-			})
-		}
-	}
+      tempListen(previewOptions, "click", function () {
+        showDropdown(previewOptions, "left", dropdown);
+      });
+    }
+  }
 
   previewRect = preview.getBoundingClientRect();
   if (previewRect.left + previewRect.width > window.innerWidth) {
@@ -355,7 +563,7 @@ modules.profilepreview = async function(element, getID) {
     preview.style.top = "";
     preview.style.transformOrigin = "center";
   }
-}
+};
 
 async function closeProfilePreview() {
   let preview = findC("profilePreview");
@@ -373,7 +581,7 @@ async function closeProfilePreview() {
 
 window.addEventListener("scroll", closeProfilePreview);
 window.addEventListener("resize", closeProfilePreview);
-window.addEventListener("mousedown", function(e) {
+window.addEventListener("mousedown", function (e) {
   if (e.target.closest(".profilePreview") == null) {
     closeProfilePreview();
   }
