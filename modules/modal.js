@@ -1,10 +1,11 @@
-modules.modal = function(title, content, buttons) {
-  let modalID = Math.floor(Math.random()*100000000);
+modules.modal = function (title, content, buttons, returnModalElement = false) {
+  let modalID = Math.floor(Math.random() * 100000000);
   let modalHTML = `<div class="modalTitle" id="modalTitle${modalID}">${title}</div><div id="modalText${modalID}">${content}</div><div class="modalButtons" id="modalButtons${modalID}"></div>`;
   let backBlur = createElement("backBlur", "div", "body");
   backBlur.id = "backBlur" + modalID;
   let newModal = createElement("modal", "div", backBlur);
   newModal.innerHTML = modalHTML;
+  newModal.id = "modal" + modalID;
   let modalButtons = findI("modalButtons" + modalID);
   for (let i in buttons) {
     let thisButton = createElement("modalButton", "button", modalButtons);
@@ -30,5 +31,5 @@ modules.modal = function(title, content, buttons) {
   }
   backBlur.style.opacity = 1;
   newModal.style.transform = "scale(1)";
-  return modalID;
-}
+  return returnModalElement ? newModal : modalID;
+};
