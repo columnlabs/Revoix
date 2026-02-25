@@ -23,7 +23,11 @@ const socket = new SimpleSocket({
   project_token: "client_a05cd40e9f0d2b814249f06fbf97fe0f1d5",
 });
 
-const peer = new Peer(`${userID};=${account.User}`);
+const peer = new Peer(
+  `${userID ? userID : "guestuser"};=${
+    account.User ? account.User : Math.floor(Math.random() * 9999999999)
+  }`
+);
 
 peer.on("call", async (call) => {
   const callStream = reqMicIfNeeded();
@@ -35,7 +39,10 @@ peer.on("call", async (call) => {
 
   if (_callIssuer.status != 200)
     return showPopUp(
-      "Security Warning",
+      `<span style="display:inline-flex; align-items:center; gap:10px; justify-content:center; width:100%; font-size:38px;">
+         <span class="material-symbols-outlined" style="font-size:38px;">gpp_maybe</span>
+         Security Warning
+       </span>`,
       "Somebody tried to call you but the user information was fake, invalid, or crafted. You are likely being targeted in a hack or exploit.",
       [["Okay", "var(--themeColor)"]]
     );
